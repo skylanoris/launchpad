@@ -1,6 +1,6 @@
 ---
 - name: Add ssh key
-  hosts: "*"
+  hosts: "k3s"
   become: true
 
   tasks:
@@ -8,7 +8,7 @@
       ansible.posix.authorized_key:
         user: "{{ lookup('env', 'USER') }}"
         state: present
-        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
     - name: Change sudoers file
       ansible.builtin.lineinfile:
