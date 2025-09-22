@@ -1,4 +1,15 @@
 ---
+- name: Bootstrap Python on DietPi
+  hosts: dietpi
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Install Python (required for Ansible)
+      ansible.builtin.raw: |
+        apt-get update -y && apt-get install -y python3
+      changed_when: false
+
 - name: Update DietPi system
   hosts: dietpi
   become: yes
@@ -8,7 +19,6 @@
     - name: Ensure system package lists are up to date
       ansible.builtin.apt:
         update_cache: yes
-      when: ansible_os_family == "Debian"
 
     - name: Run DietPi update
       ansible.builtin.command: dietpi-update 1
