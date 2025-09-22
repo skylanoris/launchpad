@@ -1,0 +1,33 @@
+---
+- name: Update DietPi system
+  hosts: dietpi
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Ensure system package lists are up to date
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Run DietPi update
+      ansible.builtin.command: dietpi-update 1
+      register: dietpi_update
+      changed_when: "'No updates required' not in dietpi_update.stdout"
+      failed_when: dietpi_update.rc != 0 and "'No updates required' not in dietpi_update.stdout"
+
+    - name: Reboot if required by DietPi
+      ansible.builtin.command: /boot/dietpi/func/dietpi-reboot required
+      register: reboot_check
+      changed_when: reboot_check.rc == 0
+      failed_when: false
+      notify: Reboot system
+
+  handlers:
+    - name: Reboot system
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible after DietPi update"
+        connect_timeout: 30
+        reboot_timeout: 600
+        pre_reboot_delay: 5
+        post_reboot_delay: 10
