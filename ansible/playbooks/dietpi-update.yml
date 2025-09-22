@@ -1,14 +1,20 @@
 ---
-- name: Bootstrap Python on DietPi
+- name: Bootstrap Python on DietPi if missing
   hosts: dietpi
   gather_facts: no
   become: yes
 
   tasks:
-    - name: Install Python (required for Ansible)
+    - name: Check if Python 3 is installed
+      ansible.builtin.raw: test -x /usr/bin/python3
+      register: python_check
+      changed_when: false
+      failed_when: python_check.rc not in [0, 1]
+
+    - name: Install Python 3 if missing
       ansible.builtin.raw: |
         apt-get update -y && apt-get install -y python3
-      changed_when: false
+      when: python_check.rc != 0
 
 - name: Update DietPi system
   hosts: dietpi
