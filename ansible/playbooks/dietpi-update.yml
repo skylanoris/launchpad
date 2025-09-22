@@ -25,9 +25,11 @@
     - name: Ensure system package lists are up to date
       ansible.builtin.apt:
         update_cache: yes
-
+        
     - name: Run DietPi update
       ansible.builtin.command: /boot/dietpi/dietpi-update 1
+      environment:
+        TERM: dumb
       register: dietpi_update
       changed_when: "'No updates required' not in dietpi_update.stdout"
       failed_when: dietpi_update.rc != 0 and "'No updates required' not in dietpi_update.stdout"
