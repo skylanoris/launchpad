@@ -34,7 +34,16 @@
       changed_when: "'No updates required' not in dietpi_update.stdout"
       failed_when: dietpi_update.rc != 0 and "'No updates required' not in dietpi_update.stdout"
 
-    - name: Reboot if required by DietPi
-      ansible.builtin.command: /boot/dietpi/func/dietpi-reboot required
-      register: reboot_check
-      changed_when: reboot_ch
+    - name: Check if reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_flag
+
+    - name: Reboot if required
+      ansible.builtin.reboot:
+        msg: "Rebooting after DietPi update"
+        connect_timeout: 30
+        reboot_timeout: 600
+        pre_reboot_delay: 5
+        post_reboot_delay: 10
+      when: reboot_flag.stat.exists
